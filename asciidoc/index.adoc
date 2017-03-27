@@ -111,7 +111,9 @@ As you start to code this function, all seems well...
 ```java
 static public boolean isTitlePalindrome(Book book)
 {
-     return new StringBuilder(book.getSimpleTitle()).reverse().toString().equals(book.getSimpleTitle());
+    String title = book.getSimpleTitle();
+    String title_backwards = new StringBuilder(title).reverse().toString();
+    return title.equals(title_backwards);
 }
 ```
 
@@ -121,8 +123,10 @@ Ahh, but now you have a problem.  What if, just what if, some jerk decides to pa
 static public boolean isTitlePalindrome(Book book)
 {
      Validator.notNull(book);
-     return new StringBuilder(book.getSimpleTitle()).reverse().toString().equals(book.getSimpleTitle());
 
+     String title = book.getSimpleTitle();
+     String title_backwards = new StringBuilder(title).reverse().toString();
+     return title.equals(title_backwards);
 }
 ```
 

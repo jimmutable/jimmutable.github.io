@@ -632,7 +632,9 @@ Speed and low memory footprint are a central part of the design</p>
 <div class="content">
 <pre class="highlight"><code class="language-java" data-lang="java">static public boolean isTitlePalindrome(Book book)
 {
-     return new StringBuilder(book.getSimpleTitle()).reverse().toString().equals(book.getSimpleTitle());
+    String title = book.getSimpleTitle();
+    String title_backwards = new StringBuilder(title).reverse().toString();
+    return title.equals(title_backwards);
 }</code></pre>
 </div>
 </div>
@@ -644,8 +646,10 @@ Speed and low memory footprint are a central part of the design</p>
 <pre class="highlight"><code class="language-java" data-lang="java">static public boolean isTitlePalindrome(Book book)
 {
      Validator.notNull(book);
-     return new StringBuilder(book.getSimpleTitle()).reverse().toString().equals(book.getSimpleTitle());
 
+     String title = book.getSimpleTitle();
+     String title_backwards = new StringBuilder(title).reverse().toString();
+     return title.equals(title_backwards);
 }</code></pre>
 </div>
 </div>
@@ -673,7 +677,7 @@ Thrown when someone tries to change something after an object has been completed
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2017-03-26 17:17:08 US Mountain Standard Time
+Last updated 2017-03-26 17:23:41 US Mountain Standard Time
 </div>
 </div>
 </body>
