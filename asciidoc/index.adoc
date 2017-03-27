@@ -1,0 +1,138 @@
+= Welcome to jimmutable
+:toc: left
+:icons: font
+
+== What is jimmutable
+
+jimmutable is both a lightweight library and a "way of thinking" that is intended to make the authorship of java code for the cloud easier, more free of mistakes, and, simply, more fun.
+
+=== Features
+
+* *Don't make me think* +
+jimmutable saves you mental energy by laying down simple, easy to follow patterns that are designed to make the error free writing of code easy
+
+* *Immutability Made Easy* +
+jimmutable, as the name implies, is patterned around easy to write and maintain immutable java objects
+
+* *Easy Unit Tests* +
+jimmutable embraces unit testing at a root level and facilitates the easy creation of unit tests. Of particular importance is the easy creation of unit tests for serialization (often a sore point)
+
+* *Easy Backwards Compatibility* +
+jimmutable makes it easy to extend an object while retaining the ability to read "old" versions of the object
+
+* *Performance* +
+Speed and low memory footprint are a central part of the design
+
+== Don't make me think
+
+"Don't make me think" is one of the core tenants of jimmutable. The theory goes something like this: each day we wake up and greet the world. At this moment of waking, we posses only a finite amount of mental energy. Think of it like a book of matches. The solution of each and every mental problem we confront during the day burns one of these matches. When our matchbook is empty, we are done. Time to go fishing, play golf, go for a walk, anything but more mental effort. Trying to work more after our matchbook is gone is just like trying to start a fire with no matches -- you can do it, but its way easier with matches.
+
+If you accept this state of affairs as being consistent with the human condition (as this author does) than one thing you can do to make your life as a programmer better is to write your code in a way that does not constantly present you with mental puzzles.
+
+How does this happen? I think a simple example will help shed light on things. Imagine, if you will, a function whose purpose is to pretty print (neatly indent etc.) XML. Outside of jimmutable, one common method signature for such a function might be:
+
+`String prettyPrintXML(String unformatted_xml)`
+
+What is so hard about that? Well, let me ask you something, based on that method signature, what does prettyPrintXML do if the input is null? What does it do if `unformatted_xml` is not a valid XML document? Does it throw an unchecked exception? If so, which one(s)? Does it simply return its input? It is, actually, a touch of a puzzle.
+
+Now, sure, you can go and read the JavaDoc for the function. Maybe the author will have been good enough to clearly document the error conditions. Maybe not, so... ctrl click in eclipse and onto the source code... DOH! I don't have the source jar installed. Ok... ummm... well, lets write a short little program to test it... BLAM! One match burned.
+
+=== How to think in jimmutable
+
+jimmutable is designed to be used "in the heat of battle". You know, you have your tunes blaring in your headphones and you are cranking out code. You are getting things done! You don't have time to check no stinking error conditions, you have sh!t to do! jimmutable is great for this because code written in this style is written with a commitment never to make you think. This is achieved by *always* following a pattern. One of jimmutable's patterns is that the error behavior of a method will always be trivially understandable from its method signature (which you can't help but see from autocomplete in eclipse while you are pounding klocs (thousands of lines of code) out.
+
+1. Method signatures that tell you (most) everything you need to know about how a function works
+2. Throw unchecked exceptions when the truly unusual happens
+3. Immutable objects make life easy and code safe
+
+== Method signatures in jimmutable
+In jimmutable, if you see a method signature like this:
+
+`String prettyPrintXML(String unformatted_xml)`
+
+Then it means: do you worst.  No matter what you give me as an argument: `null`, JavaScript, the complete text of war an peace, whatever, I will work and give you the right answer.  I hope it is immediately obvious to you, dear reader, that the `prettyPrintXML` function does not have a snowballs chance in hell of being this rugged.  As a result, it has a method signature of
+
+`String prettyPrintXML(String xml, String default_value)`
+
+(You can see it yourself, it is a real function in `JavaCodeUtils`)
+
+What does a signature like this mean?  It means, give me *anything* you want for `xml`.  I will *try* to pretty print it.  If I can't make this happen (hey, I can't pretty print the text of war a peace) I will return `default_value`.  I won't throw an exception (checked or unchecked).  I won't print a bunch of a garbage to System.out.  I will, simply, return `default_value`
+
+=== Conventions for getters
+
+Imagine that you have a jimmutable class, `Book`.  This is shockingly easy to imagine as there is, in fact, a `Book` class implemented in `org.kane.base.examples`, but I digress.  A `Book` has  several fields, one of which is title.  As we might expect, `Book` implements a method to get the title.  Its signature is as follows:
+
+`String getSimpleTitle()`
+
+Whenever you see a `getSimpleXXX` in jimmutable, you know a couple of things:
+
+1. A non-null value will always be returned
+2. Nothing too bad can happen (no exceptions, infinte loops, many seconds of computation, etc.)
+
+Now, some books have an ISBN (International Standard Book Number) (Yes, virginia, there are books in the world that _do not_ have a ISBN).  The method to get ISBN, therefore, looks like this:
+
+`String getOptionalISBN(String default_value)`
+
+You probably have already stopped thinking, and this is a good thing!  You know, intuitively, what this means.  For the record, I will share with you that, whenever you see `getOptionalXXX` in jimmutable:
+
+1.)  The field you are getting may be set, or it might be unset
+2.)  If the field is set, then the function will, trivially, return the value to you
+3.)  If the field is not set, then the function will return `default_value` to you
+4.)  The function won't take any significant amount of resources to execute, and won't do anything too bad (throw an exception etc.)
+
+=== Complicated functions
+
+Ok, so, what if I want to write a function that is truely complicated.  Something like, for a book, examine the text and tell me if the book is in iambic pentameter (note: for the  record, I have no idea how to implement this function).  In that case, the function signature will have the word `Complex` in it.  For example:
+
+`Boolean getComplexIsIambicPentameter(Boolean default_value)`
+
+or
+
+`Boolean computeComplexIsIambicPentameterByExaminingProse(Boolean default_value)`
+
+What do we know when we see Complex?
+
+1.)  This function requires some thought
+2.)  It might take a while to run
+3.)  It might not work -- when it does not work, it will return `default_value`
+
+== Dealing with the truly unusual
+
+As we merrily code along, we often find ourselves thinking "Should I check for ..." followed by "nah, only someone who is truly braindead would do that. For example, we all know that we _should_ validate every input to every function we write.  Because... Murphy's law.  Sometimes this flows very naturally.  For example, imagine that you are writing a function that reads small files from disk, returning the files bytes.  It is pretty obvious that a good method signature for this might be:
+
+`byte [] getFileBytes(File src, byte default_value[])`
+
+And this is all pretty natural.  If `src` happens to either not exist or not be a file, return `default_value` and all is well.  This also gives us a natural out for (a truly weird) case: `src` is null.
+
+Now imagine, dear reader, that you are coding a new class `BookUtils` and it implements a function that checks to see if the title of a book is a palindrome (the same spelled forward or backward) (For example, Seveneves by Neal Stephenson, ISBN 0062334514)
+
+As you start to code this function, all seems well...
+
+```java
+static public boolean isTitlePalindrome(Book book)
+{
+     return new StringBuilder(book.getSimpleTitle()).reverse().toString().equals(book.getSimpleTitle());
+}
+```
+
+Ahh, but now you have a problem.  What if, just what if, some jerk decides to pass in a `null` book.  This is, to put it mildly, super crazy unlikely.  Its probably only going to happen in development etc. and its going to make our code dumb to always have to have a default value etc. for such an edge case.  Don't worry -- in this case, jimmutable uses unchecked exceptions to "get those jerks right back".  Here is how you code this:
+
+```java
+static public boolean isTitlePalindrome(Book book)
+{
+     Validator.notNull(book);
+     return new StringBuilder(book.getSimpleTitle()).reverse().toString().equals(book.getSimpleTitle());
+
+}
+```
+
+=== The jimmutable unchecked exceptions
+
+. `ValidationException` +
+Throw a `ValidationException` whenever something is "not valid".  Frequently thrown when a function is passed invalid parameters
+
+. `SerializeException` +
+Throw when serialization goes bad.  Unable to fully read a file full of objects?  Network connection fails in the middle of downloading a file?  Throw a `SerializeException`  If _serialization_ works, but the underlying data is not valid, throw a `ValidationException`
+
+. `ImmutableException` +
+Thrown when someone tries to change something after an object has been completed
