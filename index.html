@@ -435,9 +435,18 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </li>
 <li><a href="#_don_t_make_me_think">Don&#8217;t make me think</a>
 <ul class="sectlevel2">
-<li><a href="#_how_to_not_think_in_jimmutable">How to (not) think in jimmutable</a></li>
+<li><a href="#_how_to_avoid_thinking_in_jimmutable">How to avoid thinking in jimmutable</a></li>
 <li><a href="#_method_signatures_in_jimmutable">Method signatures in jimmutable</a></li>
 <li><a href="#_dealing_with_the_truly_unusual">Dealing with the truly unusual</a></li>
+<li><a href="#_standard_immutable_objects">Standard immutable objects</a></li>
+<li><a href="#_objects_are_either_code_abstract_code_or_code_final_code">Objects are either <code>abstract</code> or <code>final</code></a></li>
+</ul>
+</li>
+<li><a href="#_immutable_objects_in_jimmutable">Immutable objects in jimmutable</a>
+<ul class="sectlevel2">
+<li><a href="#__code_standardimmutableobject_code_vs_code_stringable_code"><code>StandardImmutableObject</code> vs <code>Stringable</code></a></li>
+<li><a href="#_the_lifecycle_of_an_immutable_object">The lifecycle of an immutable object</a></li>
+<li><a href="#_when_you_need_to_call_code_complete_code_vs_when_code_complete_code_is_called_for_you">When you need to call <code>complete</code> vs when <code>complete</code> is called for you</a></li>
 </ul>
 </li>
 </ul>
@@ -535,7 +544,7 @@ Much thought and consideration is given to the poor souls that must toil in the 
 <p>Now, sure, you can go and read the JavaDoc for the function. Maybe the author will have been good enough to clearly document the error conditions. Maybe not, so&#8230;&#8203; ctrl click in eclipse and onto the source code&#8230;&#8203; DOH! I don&#8217;t have the source jar installed. Ok&#8230;&#8203; ummm&#8230;&#8203; well, lets write a short little program to test it&#8230;&#8203; BLAM! One match burned.</p>
 </div>
 <div class="sect2">
-<h3 id="_how_to_not_think_in_jimmutable">How to (not) think in jimmutable</h3>
+<h3 id="_how_to_avoid_thinking_in_jimmutable">How to avoid thinking in jimmutable</h3>
 <div class="paragraph">
 <p>jimmutable is designed to be used "in the heat of battle". You know, you have your tunes blaring in your headphones and you are cranking out code. You are getting things done! You don&#8217;t have time to check no stinking error conditions, you have sh!t to do! jimmutable is great for this because code written in this style is written with a commitment never to make you think. This is achieved by <strong>always</strong> following a pattern. One of jimmutable&#8217;s patterns is that the error behavior of a method will always be trivially understandable from its method signature (which you can&#8217;t help but see from autocomplete in eclipse while you are pounding klocs (thousands of lines of code) out.</p>
 </div>
@@ -696,12 +705,146 @@ Thrown when someone tries to change something after an object has been completed
 </div>
 </div>
 </div>
+<div class="sect2">
+<h3 id="_standard_immutable_objects">Standard immutable objects</h3>
+<div class="paragraph">
+<p>By default, objects in jimmutable are robust and well behaved.  Any object that extends <code>StandardImmutableObject</code>:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>is immutable (after construction)</p>
+</li>
+<li>
+<p>is serializable to and from XML</p>
+</li>
+<li>
+<p>is serializable to and from JSON</p>
+</li>
+<li>
+<p>is deep-clonable (simply call <code>deepClone</code>)</p>
+</li>
+<li>
+<p>has robust support for data normalization</p>
+</li>
+<li>
+<p>is checked for data validity every time an object is created/de-serialized</p>
+</li>
+<li>
+<p>has a proper implementation of <code>hashCode</code></p>
+</li>
+<li>
+<p>has a fast implementation of <code>equals</code></p>
+</li>
+<li>
+<p>has a fast implementation of <code>compareTo</code></p>
+</li>
+<li>
+<p>is easy to write a unit test for (see the various unit test examples and the <code>toJavaCode</code> function)</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>This helps you avoid thinking on several fronts:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Is this object thread safe?  Of course&#8230;&#8203; its immmutable</p>
+</li>
+<li>
+<p>Is it safe to return a reference to this object? Of course&#8230;&#8203; its immutable</p>
+</li>
+<li>
+<p>Can I add this object to a <code>Set</code>? <code>HashSet</code>? <code>TreeSet</code> Of course&#8230;&#8203;</p>
+</li>
+<li>
+<p>Can this object be the key of a <code>Map</code>? Of course!</p>
+</li>
+<li>
+<p>Can I duplicate this object? Yes!  But no real need&#8230;&#8203; its immutable&#8230;&#8203;</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_objects_are_either_code_abstract_code_or_code_final_code">Objects are either <code>abstract</code> or <code>final</code></h3>
+<div class="paragraph">
+<p>In jimmutable, any class you make should either be abstract or final.  This saves you a whole ton of mental energy.</p>
+</div>
+<div class="paragraph">
+<p>How?  Well, lets put it this way, designing classes that can <em>safely</em> be extended is super difficult.  Oh, sure, you may <strong>think</strong> you have, without thinking about it, made a class that is trivially extendable&#8230;&#8203; but you probably have not.  Is it thread safe? Can it serialize/de-serialize?  Does it have weird construction errors?  What happens when someone extends it that does not know what the heck they are doing?</p>
+</div>
+<div class="paragraph">
+<p>It is, basically, impossible, to create on unintentionally.  Therefore, we save ourselves from having to think about this by making it explicit: if we are designing a class that can be extended we declare it <code>abstract</code>.  Otherwise, it is <code>final</code>.</p>
+</div>
+<div class="paragraph">
+<p>I can hear the objections already: this breaks OOP!  I can see the examples:  <code>Shape</code>, <code>Rectangle extends Shape</code>, <code>Square Extends Rectangle</code>.  To which is say: no, its easier to have <code>Shape</code>, <code>AbstractRectangle extends Shape</code>, <code>final Rectangle extends AbstractRectangle</code>, <code>final Square exetends AbstractRectangle</code>.  Trust me.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_immutable_objects_in_jimmutable">Immutable objects in jimmutable</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>So, you want to make a new immutable object in jimmutable.  Easy, either extend <code>StandardImmutableObject</code> or <code>Stringable</code></p>
+</div>
+<div class="sect2">
+<h3 id="__code_standardimmutableobject_code_vs_code_stringable_code"><code>StandardImmutableObject</code> vs <code>Stringable</code></h3>
+<div class="paragraph">
+<p>You should extends <code>Stringable</code> whenever you are creating a class that is easily serialized to (and de-serialized from) a <code>String</code>.  For example, see <code>BrandCode</code> and/or <code>PartNumber</code> in jimmutable&#8217;s examples.  Both simply "wrap", and limit the allowable contents of, a <code>String</code>.  Therefore, they extend <code>Stringable</code>.</p>
+</div>
+<div class="paragraph">
+<p>BTW: <code>Stringable</code> iteself simply extends <code>StandardImmutableObject</code>.  So&#8230;&#8203; all it really does at the end of the day is save you some typing.  That being said, <em>please</em> use <code>Stringable</code> when applicable.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_the_lifecycle_of_an_immutable_object">The lifecycle of an immutable object</h3>
+<div class="paragraph">
+<p>Every immutable objects <em>starts life</em> as a mutable one.  When you think about it, this simply must always be the case&#8201;&#8212;&#8201;otherwise, how would you set any of the fields during construction?  Outside of the construction chain, however, every <code>StandardImmutableObject</code> is immutable.  This means that, no matter what you do, it is not possible to obtain a reference to a <code>StandardImmutableObject</code> that is not immutable.</p>
+</div>
+<div class="paragraph">
+<p>How does an object make the transition from mutable to immutable?  Simple: a call is made to <code>complete()</code></p>
+</div>
+<div class="paragraph">
+<p><code>complete()</code> performs the following actions, in <strong>exactly</strong> the following order:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p><code>normalize()</code></p>
+</li>
+<li>
+<p><code>validate()</code></p>
+</li>
+<li>
+<p><code>freeze()</code></p>
+</li>
+</ol>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_when_you_need_to_call_code_complete_code_vs_when_code_complete_code_is_called_for_you">When you need to call <code>complete</code> vs when <code>complete</code> is called for you</h3>
+<div class="paragraph">
+<p>If you create your <em>own</em>, <em>non serialization</em> constructor, you need to (once you are done modifying the object being built) call <code>complete</code> yourself.</p>
+</div>
+<div class="paragraph">
+<p>When objects are created via de-serialization (i.e. <code>StandardObject.deserialize</code>), then <code>complete</code> is called for you.  Since your de-serialziation constructor (the constructor that takes an <code>ObjectParseTree</code> as its only parameter) is invoked as part of the de-serialization process, you <strong>do not</strong> need to call complete in this constructor (indeed, that is a big no-no)</p>
+</div>
+<div class="paragraph">
+<p>When an object is cloned (<code>deepClone</code>) it is serialized and de-serialzied, therefore <code>complete</code> is called for you.</p>
+</div>
+<div class="paragraph">
+<p>Because our standard builder pattern (more on this later) uses <code>deepClone</code>, there is no need to call <code>coplete</code> when building an object using a builder (it is called for you via <code>deepClone</code>)</p>
+</div>
+</div>
 </div>
 </div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2017-03-28 14:23:28 US Mountain Standard Time
+Last updated 2017-03-28 16:52:54 US Mountain Standard Time
 </div>
 </div>
 </body>

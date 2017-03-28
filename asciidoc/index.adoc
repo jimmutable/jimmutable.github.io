@@ -58,7 +58,7 @@ What is so hard about that? Well, let me ask you something, based on that method
 
 Now, sure, you can go and read the JavaDoc for the function. Maybe the author will have been good enough to clearly document the error conditions. Maybe not, so... ctrl click in eclipse and onto the source code... DOH! I don't have the source jar installed. Ok... ummm... well, lets write a short little program to test it... BLAM! One match burned.
 
-=== How to (not) think in jimmutable
+=== How to avoid thinking in jimmutable
 
 jimmutable is designed to be used "in the heat of battle". You know, you have your tunes blaring in your headphones and you are cranking out code. You are getting things done! You don't have time to check no stinking error conditions, you have sh!t to do! jimmutable is great for this because code written in this style is written with a commitment never to make you think. This is achieved by *always* following a pattern. One of jimmutable's patterns is that the error behavior of a method will always be trivially understandable from its method signature (which you can't help but see from autocomplete in eclipse while you are pounding klocs (thousands of lines of code) out.
 
@@ -161,3 +161,68 @@ Throw when serialization goes bad.  Unable to fully read a file full of objects?
 
 . `ImmutableException` +
 Thrown when someone tries to change something after an object has been completed
+
+=== Standard immutable objects
+
+By default, objects in jimmutable are robust and well behaved.  Any object that extends `StandardImmutableObject`:
+
+* is immutable (after construction)
+* is serializable to and from XML
+* is serializable to and from JSON
+* is deep-clonable (simply call `deepClone`)
+* has robust support for data normalization
+* is checked for data validity every time an object is created/de-serialized
+* has a proper implementation of `hashCode`
+* has a fast implementation of `equals`
+* has a fast implementation of `compareTo`
+* is easy to write a unit test for (see the various unit test examples and the `toJavaCode` function)
+
+This helps you avoid thinking on several fronts:
+
+* Is this object thread safe?  Of course... its immmutable
+* Is it safe to return a reference to this object? Of course... its immutable
+* Can I add this object to a `Set`? `HashSet`? `TreeSet` Of course...
+* Can this object be the key of a `Map`? Of course!
+* Can I duplicate this object? Yes!  But no real need... its immutable...
+
+=== Objects are either `abstract` or `final`
+
+In jimmutable, any class you make should either be abstract or final.  This saves you a whole ton of mental energy.
+
+How?  Well, lets put it this way, designing classes that can _safely_ be extended is super difficult.  Oh, sure, you may *think* you have, without thinking about it, made a class that is trivially extendable... but you probably have not.  Is it thread safe? Can it serialize/de-serialize?  Does it have weird construction errors?  What happens when someone extends it that does not know what the heck they are doing?
+
+It is, basically, impossible, to create on unintentionally.  Therefore, we save ourselves from having to think about this by making it explicit: if we are designing a class that can be extended we declare it `abstract`.  Otherwise, it is `final`.
+
+I can hear the objections already: this breaks OOP!  I can see the examples:  `Shape`, `Rectangle extends Shape`, `Square Extends Rectangle`.  To which is say: no, its easier to have `Shape`, `AbstractRectangle extends Shape`, `final Rectangle extends AbstractRectangle`, `final Square exetends AbstractRectangle`.  Trust me.
+
+== Immutable objects in jimmutable
+
+So, you want to make a new immutable object in jimmutable.  Easy, either extend `StandardImmutableObject` or `Stringable`
+
+=== `StandardImmutableObject` vs `Stringable`
+
+You should extends `Stringable` whenever you are creating a class that is easily serialized to (and de-serialized from) a `String`.  For example, see `BrandCode` and/or `PartNumber` in jimmutable's examples.  Both simply "wrap", and limit the allowable contents of, a `String`.  Therefore, they extend `Stringable`.
+
+BTW: `Stringable` iteself simply extends `StandardImmutableObject`.  So... all it really does at the end of the day is save you some typing.  That being said, _please_ use `Stringable` when applicable.
+
+=== The lifecycle of an immutable object
+
+Every immutable objects _starts life_ as a mutable one.  When you think about it, this simply must always be the case -- otherwise, how would you set any of the fields during construction?  Outside of the construction chain, however, every `StandardImmutableObject` is immutable.  This means that, no matter what you do, it is not possible to obtain a reference to a `StandardImmutableObject` that is not immutable.
+
+How does an object make the transition from mutable to immutable?  Simple: a call is made to `complete()`
+
+`complete()` performs the following actions, in *exactly* the following order:
+
+. `normalize()`
+. `validate()`
+. `freeze()`
+
+=== When you need to call `complete` vs when `complete` is called for you
+
+If you create your _own_, _non serialization_ constructor, you need to (once you are done modifying the object being built) call `complete` yourself.
+
+When objects are created via de-serialization (i.e. `StandardObject.deserialize`), then `complete` is called for you.  Since your de-serialziation constructor (the constructor that takes an `ObjectParseTree` as its only parameter) is invoked as part of the de-serialization process, you *do not* need to call complete in this constructor (indeed, that is a big no-no)
+
+When an object is cloned (`deepClone`) it is serialized and de-serialzied, therefore `complete` is called for you.
+
+Because our standard builder pattern (more on this later) uses `deepClone`, there is no need to call `coplete` when building an object using a builder (it is called for you via `deepClone`)
