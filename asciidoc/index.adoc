@@ -2,11 +2,15 @@
 :toc: left
 :icons: font
 
-== What is jimmutable
+== Introduction
+
+=== What is jimmutable?
 
 jimmutable is both a lightweight library and a "way of thinking" that is intended to make the authorship of java code for the cloud easier, more free of mistakes, and, simply, more fun.
 
-=== Features
+Although a general purpose java library, jimmutable is particularly well suited to the writing of cloud (AWS) hosted micro-services.
+
+=== Key Features
 
 * *Don't make me think* +
 jimmutable saves you mental energy by laying down simple, easy to follow patterns that are designed to make the error free writing of code easy
@@ -23,6 +27,23 @@ jimmutable makes it easy to extend an object while retaining the ability to read
 * *Performance* +
 Speed and low memory footprint are a central part of the design
 
+* *Loved by System Administrators* +
+Much thought and consideration is given to the poor souls that must toil in the never ending effort to keep our apps up.  We are forever in your debt.  jimmutable tries to make your life easier
+
+=== Can I use jimmutable in my project?
+
+Almost certainly.  All of jimmutable is licensed under the https://opensource.org/licenses/BSD-3-Clause[3-clause BSD license].  If that is not permissive enough, what is?
+
+So, fork  it, port it, use it commercially... basically, have at it!
+
+=== Where can I get jimmutable?
+
+* `pages` -- what you reading right now +
+https://github.com/jimmutable/jimmutable.github.io.git
+
+* `core` -- immutability, serialization, threading, exceptions, etc. +
+https://github.com/jimmutable/core.git
+
 == Don't make me think
 
 "Don't make me think" is one of the core tenants of jimmutable. The theory goes something like this: each day we wake up and greet the world. At this moment of waking, we posses only a finite amount of mental energy. Think of it like a book of matches. The solution of each and every mental problem we confront during the day burns one of these matches. When our matchbook is empty, we are done. Time to go fishing, play golf, go for a walk, anything but more mental effort. Trying to work more after our matchbook is gone is just like trying to start a fire with no matches -- you can do it, but its way easier with matches.
@@ -37,7 +58,7 @@ What is so hard about that? Well, let me ask you something, based on that method
 
 Now, sure, you can go and read the JavaDoc for the function. Maybe the author will have been good enough to clearly document the error conditions. Maybe not, so... ctrl click in eclipse and onto the source code... DOH! I don't have the source jar installed. Ok... ummm... well, lets write a short little program to test it... BLAM! One match burned.
 
-=== How to think in jimmutable
+=== How to (not) think in jimmutable
 
 jimmutable is designed to be used "in the heat of battle". You know, you have your tunes blaring in your headphones and you are cranking out code. You are getting things done! You don't have time to check no stinking error conditions, you have sh!t to do! jimmutable is great for this because code written in this style is written with a commitment never to make you think. This is achieved by *always* following a pattern. One of jimmutable's patterns is that the error behavior of a method will always be trivially understandable from its method signature (which you can't help but see from autocomplete in eclipse while you are pounding klocs (thousands of lines of code) out.
 
@@ -45,7 +66,7 @@ jimmutable is designed to be used "in the heat of battle". You know, you have yo
 2. Throw unchecked exceptions when the truly unusual happens
 3. Immutable objects make life easy and code safe
 
-== Method signatures in jimmutable
+=== Method signatures in jimmutable
 In jimmutable, if you see a method signature like this:
 
 `String prettyPrintXML(String unformatted_xml)`
@@ -58,7 +79,7 @@ Then it means: do you worst.  No matter what you give me as an argument: `null`,
 
 What does a signature like this mean?  It means, give me *anything* you want for `xml`.  I will *try* to pretty print it.  If I can't make this happen (hey, I can't pretty print the text of war a peace) I will return `default_value`.  I won't throw an exception (checked or unchecked).  I won't print a bunch of a garbage to System.out.  I will, simply, return `default_value`
 
-=== Conventions for getters
+==== Conventions for getters
 
 Imagine that you have a jimmutable class, `Book`.  This is shockingly easy to imagine as there is, in fact, a `Book` class implemented in `org.kane.base.examples`, but I digress.  A `Book` has  several fields, one of which is title.  As we might expect, `Book` implements a method to get the title.  Its signature is as follows:
 
@@ -80,7 +101,7 @@ You probably have already stopped thinking, and this is a good thing!  You know,
 3.)  If the field is not set, then the function will return `default_value` to you
 4.)  The function won't take any significant amount of resources to execute, and won't do anything too bad (throw an exception etc.)
 
-=== Complicated functions
+==== Complicated functions
 
 Ok, so, what if I want to write a function that is truely complicated.  Something like, for a book, examine the text and tell me if the book is in iambic pentameter (note: for the  record, I have no idea how to implement this function).  In that case, the function signature will have the word `Complex` in it.  For example:
 
@@ -96,7 +117,7 @@ What do we know when we see Complex?
 2.)  It might take a while to run
 3.)  It might not work -- when it does not work, it will return `default_value`
 
-== Dealing with the truly unusual
+=== Dealing with the truly unusual
 
 As we merrily code along, we often find ourselves thinking "Should I check for ..." followed by "nah, only someone who is truly braindead would do that. For example, we all know that we _should_ validate every input to every function we write.  Because... Murphy's law.  Sometimes this flows very naturally.  For example, imagine that you are writing a function that reads small files from disk, returning the files bytes.  It is pretty obvious that a good method signature for this might be:
 
@@ -130,7 +151,7 @@ static public boolean isTitlePalindrome(Book book)
 }
 ```
 
-=== The jimmutable unchecked exceptions
+==== The jimmutable unchecked exceptions
 
 . `ValidationException` +
 Throw a `ValidationException` whenever something is "not valid".  Frequently thrown when a function is passed invalid parameters
