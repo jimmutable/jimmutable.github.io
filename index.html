@@ -449,6 +449,17 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#_when_you_need_to_call_code_complete_code_vs_when_code_complete_code_is_called_for_you">When you need to call <code>complete</code> vs when <code>complete</code> is called for you</a></li>
 </ul>
 </li>
+<li><a href="#_virtualized_backplane">Virtualized Backplane</a>
+<ul class="sectlevel2">
+<li><a href="#_virtualized_backplane_list_of_installed_services_on_image">List of Installed Services on Image</a></li>
+<li><a href="#_virtualized_backplane_step_1">Step 1: Enable Virtualization On Your Computer</a></li>
+<li><a href="#_virtualized_backplane_step_2">Step 2: Download and Install VirtualBox</a></li>
+<li><a href="#_virtualized_backplane_step_3">Step 3: Download the Virtual Backplane Image</a></li>
+<li><a href="#_virtualized_backplane_step_4">Step 4: Import and Star the VM in VirtualBox</a></li>
+<li><a href="#_virtualized_backplane_step_5">Step 5: Launch your Web App</a></li>
+<li><a href="#_virtualized_backplane_extra_debugging_info">Extra Debugging Info</a></li>
+</ul>
+</li>
 </ul>
 </div>
 </div>
@@ -841,7 +852,169 @@ Thrown when someone tries to change something after an object has been completed
 </div>
 </div>
 </div>
+<div class="sect1">
+	<h2 id="_virtualized_backplane">Virtualized Backplane</h2>
+		<div class="sectionbody">
+			<div class="paragraph">
+				<p>To aid in development for Jimmutable apps, we utilize a virtualized intance of the backplane. The backplane consists of Elasticsearch, Kibana, and Redis, and all of these live on a VM using VirtualBox. This allows us to simply deploy an image and start up the VM to be ready to develop web applications, rather than having to create local installations and maintain versions on an individual basis.</p>
+			</div>
+			<div class="sect2">
+				<h3 id="_virtualized_backplane_list_of_installed_services_on_image">List of Installed Services on Image</h3>
+				<div class="paragraph">
+					<div class="ulist">
+						<ul>
+							<li>
+								<p>Amazon Linux AMI</p>
+							</li>
+							<li>
+								<p>Java 1.8</p>
+							</li>
+							<li>
+								<p>Elasticsearch 6.1 (port 9200 and 9300)</p>
+							</li>
+							<li>
+								<p>Kibana 6.1 (port 5601)</p>
+							</li>
+							<li>
+								<p>Redis 4.0 (port 6379)</p>
+							</li>
+						</ul>					
+					</div>
+					<div class="paragraph">
+						<p>All running on local host (127.0.0.1)</p>
+					</div>
+				</div>
+			</div>
+			<div class="sect2">
+				<h3 id="_virtualized_backplane_step_1">Step 1: Enable Virtualization On Your Computer</h3>
+				<div class="paragraph">
+					<p>In order for VirtualBox to be fully operational, your computer must be setup to allow for virtualization. If your computer is already set up to do so, feel free to skip this step.</p>
+				</div>
+				<h4 id="_virtualized_backplane_step_1_pc">Windows PCs</h4>
+				<div class="paragraph">
+					<p>You will need to configure your processor in the BIOS to allow for virtualization. Open the BIOS and find “Intel Virtualization” and enable it. Save your changes and boot up your computer as normal.</p>
+				</div>
+				<h4 id="_virtualized_backplane_step_1_mac">Mac</h4>
+				<div class="paragraph">
+					<p>Virtualization support for your processor should be enabled by default. Skip this step if that's the case, otherwise use <a href="https://apple.stackexchange.com/questions/27264/how-to-turn-on-intel-vt-in-macbook-pro-2011-mc721ll-a">this handy guide</a></p>
+				</div>
+			</div>
+			<div class="sect2">
+			<h3 id="_virtualized_backplane_step_2">Step 2: Download and Install VirtualBox</h3>
+				<div class="paragraph">
+					<p>Visit <a href="https://www.virtualbox.org/wiki/Downloads">VirtualBox's download page</a> and download the latest VirtualBox client for your OS. When running through the installer, choose all the default options.</p>
+				</div>
+			</div>
+			<div class="sect2">
+			<h3 id="_virtualized_backplane_step_3">Step 3: Download the Virtual Backplane Image</h3>
+				<div class="paragraph">
+					<p>We've created a VirtualBox VM Image (.OVA) file to use for the VM. Download it <a href="https://s3.amazonaws.com/rws-dev-rws-installers/windows/panda-environment/jimmutable_virtual_backplane.ova">here</a>. Be careful, it's big (~800 MB).</p>
+				</div>
+			</div>
+			<div class="sect2">
+			<h3 id="_virtualized_backplane_step_4">Step 4: Import and Star the VM in VirtualBox</h3>
+				<div class="paragraph">
+					<p>In VirtualBox, click File → Import Appliance. Select the image that you downloaded in Step 3. Leave the default options for the import process. Once completed, it should show up in the list of VMs available. Start it using the Start button (Alternatively, choose Normal Start).</p>
+				</div>				
+				<div class="paragraph">
+					<p>A new window should appear with your Linux instance. Select the latest Amazon AMI build, and advance to the login screen. Your VM is now up and running. All services (Elasticsearch, Kibana, and Redis) have been configured to start on boot, and port forwarding allows them to be used as localhost instances. So your backplane is up and ready to go!</p>
+				</div>
+			</div>
+			<h3 id="_virtualized_backplane_step_5">Step 5: Launch your Web App</h3>
+				<div class="paragraph">
+					<p>When working with Elasticsearch, Kibana, and Redis, Jimmutable applications default to localhost and the associated ports (9200/9300, 5601, and 6379 respectively). This is what the VM has been configured for as well.</p>
+				</div>				
+				<div class="paragraph">
+					<p>Launch your web application, and it should attempt to connect or use these services as if they were running on localhost.</p>
+				</div>
+				<div class="paragraph">
+					<p>One common issue lies with Elasticsearch, where if the Transport client for your App is not the corresponding version running on your VM, you will be unable to connect. If this is the case, ensure that the VM version matches your Transport client and update either of them accordingly. This issue will hopefully be solved if we convert to the Elasticsearch Rest client someday.</p>
+				</div>
+			</div>
+			
+			<div class="sect2">
+				<h3 id="_virtualized_backplane_extra_debugging_info">Extra Debugging Info</h3>
+				<div class="paragraph">
+					<p>Login</p>
+				</div>
+				<div class="paragraph">					
+					<div class="ulist">
+						<ul>
+							<li>
+								<p>username: ec2-user</p>
+							</li>
+							<li>
+								<p>password: password</p>
+							</li>
+						</ul>					
+					</div>
+				</div>
+				<div class="paragraph">
+					<p>To modify configs</p>
+				</div>
+				<div class="paragraph">					
+					<div class="ulist">
+						<ul>
+							<li>
+								<p>sudo nano /etc/elasticsearch/elasticsearch.yml</p>
+							</li>
+							<li>
+								<p>sudo nano /etc/kibana/kibana.yml</p>
+							</li>
+							<li>
+								<p>sudo nano /etc/redis/redis.conf</p>
+							</li>
+							<li>
+								<p>Be sure to restart the respective service</p>
+							</li>
+						</ul>					
+					</div>
+				</div>
+				<div class="paragraph">
+					<p>To restart services</p>
+				</div>
+				<div class="paragraph">					
+					<div class="ulist">
+						<ul>
+							<li>
+								<p>sudo systemctl restart elasticsearch</p>
+							</li>
+							<li>
+								<p>sudo systemctl restart kibana</p>
+							</li>
+							<li>
+								<p>sudo systemctl restart redis</p>
+							</li>
+							<li>
+								<p>Alternatively, restart the whole VM</p>
+							</li>
+						</ul>						
+					</div>
+				</div>
+				<div class="paragraph">
+					<p>To check service status</p>
+				</div>
+				<div class="paragraph">					
+					<div class="ulist">
+						<ul>
+							<li>
+								<p>sudo systemctl status elasticsearch</p>
+							</li>
+							<li>
+								<p>sudo systemctl status kibana</p>
+							</li>
+							<li>
+								<p>sudo systemctl status redis</p>
+							</li>
+						</ul>					
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
 </div>
+</div>
+
 <div id="footer">
 <div id="footer-text">
 Last updated 2017-03-28 16:52:54 US Mountain Standard Time
