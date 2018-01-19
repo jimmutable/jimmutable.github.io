@@ -864,7 +864,7 @@ Thrown when someone tries to change something after an object has been completed
 					<div class="ulist">
 						<ul>
 							<li>
-								<p>Amazon Linux AMI</p>
+								<p>Amazon Linux 2 AMI</p>
 							</li>
 							<li>
 								<p>Java 1.8</p>
@@ -908,7 +908,7 @@ Thrown when someone tries to change something after an object has been completed
 			<div class="sect2">
 			<h3 id="_virtualized_backplane_step_3">Step 3: Download the Virtual Backplane Image</h3>
 				<div class="paragraph">
-					<p>We've created a VirtualBox VM Image (.OVA) file to use for the VM. Download it <a href="https://s3.amazonaws.com/rws-dev-rws-installers/windows/panda-environment/jimmutable_virtual_backplane.ova">here</a>. Be careful, it's big (~800 MB).</p>
+					<p>We've created a VirtualBox VM Image (.OVA) file to use for the VM. Download it <a href="http://jimmutable-virtualized-backplane.s3-us-west-2.amazonaws.com/jimmutable_virtual_backplane.ova">here</a>. Be careful, it's big (~800 MB).</p>
 				</div>
 			</div>
 			<div class="sect2">
@@ -949,6 +949,30 @@ Thrown when someone tries to change something after an object has been completed
 						</ul>					
 					</div>
 				</div>
+				<div class="paragraph">
+					<p>Operating the shell</p>
+				</div>
+				<div class="paragraph">					
+					The VM runs on Amazon Linux 2 AMI, which is a CentOS-based distro. There isn't a lot of specific documentation on Amazon Linux 2. When researching, it's best to include CentOS in your searches instead.
+				</div>			
+				<div class="paragraph">
+					<p>Service data locations</p>
+				</div>
+				<div class="paragraph">					
+					<div class="ulist">
+						<ul>
+							<li>
+								<p>/usr/share/elasticsearch/</p>
+							</li>
+							<li>
+								<p>/usr/share/kibana</p>
+							</li>
+							<li>
+								<p>/usr/local/bin (Redis)</p>
+							</li>
+						</ul>					
+					</div>
+				</div>				
 				<div class="paragraph">
 					<p>To modify configs</p>
 				</div>
